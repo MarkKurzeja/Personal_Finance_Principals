@@ -1,0 +1,613 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+% Purpose:       Dense Three Column Summary                                    %
+%                                                                              %
+% Author:        Mark Kurzeja                                                  %
+% Contact:       mtkurzej@umich.edu                                            %
+% Client:        Mark Kurzeja                                                  %
+%                                                                              %
+% Code creation: 2015-10-10                                                    %
+%                                                                              %
+% Comment:       Create three column dense info sheets for the presentation o  %
+%                f concise information or to quickly condense a topic or a     %
+%                class into a handout                                          %
+%                                                                              %
+% License:       MIT Open Source License                                       %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[landscape]{article}
+
+% Opening
+\title{}
+\author{}
+
+% Packages
+\usepackage{multicol}
+% Control the geometry of the page with 1/2 inch margins
+\usepackage[width = 10.5in, height = 8in]{geometry}
+\usepackage{xspace}
+\usepackage{nicefrac}
+\usepackage{amsmath}
+\usepackage{lipsum}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{wasysym} % Fullmoon
+\usepackage{float}
+\usepackage{todonotes}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{makecell} % for \makecell{.... \\ .....} for multiline cells
+\usepackage{changepage}   % for the adjustwidth environmen
+\usepackage{siunitx} % For the num operator in producing scientific notation
+\usepackage{multicol}
+
+% Fonts selection
+\usepackage[oldstylenums]{kpfonts}
+%\usepackage[regular, default]{sourcesanspro} % Very close to Myriad - favorite sans serif % option light,scale
+%\usepackage{alegreya}
+%\usepackage[sfdefault]{universalis}
+%\usepackage{ebgaramond}
+%\usepackage{accanthis}
+%\usepackage{libertine}
+%\renewcommand{\familydefault}{\sfdefault}
+% Use the following for the baskerville fonts ----
+%\usepackage{lmodern} % monospace font
+%\usepackage[scale=0.89]{tgheros} % Helvetica is too big
+%\usepackage[osf]{Baskervaldx} % tosf in text, tlf in math
+%\usepackage[baskervaldx,cmintegrals,bigdelims,vvarbb]{newtxmath} % math italic letters from Baskervaldx
+% ------------------------------------------------
+
+% ==============================================================================
+% Listings Declaration
+% ==============================================================================
+
+\usepackage{listings} 
+%\lstset{language=R} 
+\usepackage{color}
+\definecolor{mygreen}{rgb}{0,0.6,0}
+\definecolor{mygray}{rgb}{0.5,0.5,0.5}
+\definecolor{mymauve}{rgb}{0.58,0,0.82}
+
+\lstset{ %
+	backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\scriptsize,        % the size of the fonts that are used for the code
+	breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+	breaklines=true,                 % sets automatic line breaking
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{mygreen},    % comment style
+	deletekeywords={...},            % if you want to delete keywords from the given language
+	escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,	                   % adds a frame around the code
+	keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	keywordstyle=\color{blue},       % keyword style
+	language=R,                 % the language of the code
+	otherkeywords={*,...},            % if you want to add more keywords to the set
+	numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+	numbersep=5pt,                   % how far the line-numbers are from the code
+	numberstyle=\tiny\color{mygray}, % the style that is used for the line-numbers
+	rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,          % underline spaces within strings only
+	showtabs=false,                  % show tabs within strings adding particular underscores
+	stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{mymauve},     % string literal style
+	tabsize=2,	                   % sets default tabsize to 2 spaces
+	title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+% ==============================================================================
+% Commands Declaration
+% ==============================================================================
+
+% For collapsing the lists to a single condensed itemized list
+\usepackage{enumitem}
+\setlist{nosep} % or \setlist{noitemsep} to leave space around whole list
+
+% Specific functions that remove the issues with the spacing around an align enviroment
+\usepackage{etoolbox}
+\newcommand{\zerodisplayskips}{
+	\setlength{\abovedisplayskip}{2pt}
+	\setlength{\belowdisplayskip}{2pt}
+	\setlength{\abovedisplayshortskip}{2pt}
+	\setlength{\belowdisplayshortskip}{2pt}
+}
+\appto{\normalsize}{\zerodisplayskips}
+\appto{\small}{\zerodisplayskips}
+\appto{\footnotesize}{\zerodisplayskips}
+
+% A simple figure environment for inserting a picture into the column
+% Arguments:
+% 1: Name of the picture file
+% 2: Caption for the picture
+\newcommand{\qpics}[2]{
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.6\linewidth]{./#1}
+		\label{fig:#1}
+	\end{figure}
+}
+
+% Command for creating a very specific spaced hrule that wont interfere with the 
+% text around it
+\newcommand{\myline}{\vspace{4pt}\hrule  \vspace{4pt}}
+
+% Command for breaking the current line of thought into a new column, and placing
+% a new line above the next column
+\newcommand{\mynewcolumn}{\columnbreak \myline}
+
+% Home-made inline bullet points for compact lists
+\newcommand{\mydot}{\ensuremath{\bullet}\xspace} %\ensuremath{\cdot}\xspace}
+
+% Command for inserting a legal blob!
+\newcommand{\legalblob}{\ensuremath{ \left[ \newmoon \right] } \xspace}
+
+% Command that adds a space after the use of an item command in a description 
+% environment
+% Description Environment Item Helper Commands
+\newcommand{\im}[1]{\item[#1] \xspace}
+\newcommand{\imp}[1]{\item[(#1)] \xspace}
+
+% Auto-commas for long nominal and dollar amounts
+\RequirePackage{siunitx}
+\newcommand{\commasep}[1]{\num[group-separator={,}]{#1}}
+\newcommand{\money}[1]{\$\commasep{#1}}
+
+% For mathematical expectations enclosure
+\newcommand{\expt}[1]{\ensuremath{\mathbb{E}\left[ #1\right] }\xspace}
+
+% ==============================================================================
+% The main topic command which is the workhorse of this document
+% Command that allows one to generate topics quickly
+% Arguments:
+% 1: Header for this particular topic
+% 2: Body of the topic
+% ==============================================================================
+
+\definecolor{harvardcrimson}{HTML}{A41034} % For the main headings
+\definecolor{harvardblue}{HTML}{0D667F} % For the sub headings
+%\definecolor{brewerred}{HTML}{E41A1C}
+%\definecolor{brewerblue}{HTML}{377EB8}
+%\definecolor{brewergreen}{HTML}{4DAF4A}
+%\definecolor{harvardgrey}{HTML}{B6B6B6}
+%\definecolor{harvarddarkgrey}{HTML}{808285}
+
+% ==============================================================================
+% How to use this document:
+% Use \mynewcolumn to start a new column
+% Use \topic to start another mini topic -> main command
+% Use \ctopic to clear a topic from existence without commenting it
+% Use \mydot to get a bullet figure for quicklists (lists for which you don't 
+%      have a line break)
+% Use \myline to get an hrule in a place that you wish
+% ==============================================================================
+
+% Main command for creating a topic which is the main unit of parsing 
+\newenvironment{topic}[1]{
+	\noindent \textbf{\textsc{\color{harvardcrimson}{#1}}}
+	\noindent \hspace{-3.5pt}
+}{
+	\myline
+}
+
+% A method for clearing out a topic command without commenting it out
+\newenvironment{ctopic}[1]{
+}{
+}
+
+% For creating super neat indented sub paragraphs
+\newenvironment{tellme}[1]{
+	\noindent \textbf{\textit{\color{harvardblue}{#1}}}
+	\begin{adjustwidth}{9pt}{}
+	}{
+	\end{adjustwidth}
+}
+% for creating a principal
+\definecolor{dark-grey}{gray}{0.30}
+\newenvironment{prin}[1]{
+%	\noindent \textit{\color{harvardblue}{#1}}
+	\noindent \textit{\color{black}{#1}}
+	\begin{adjustwidth}{9pt}{}
+		\color{dark-grey}
+	}{
+	\end{adjustwidth}
+}
+
+
+% For creating item enviroments that are flush left with the margin
+\newenvironment{compactitem}{
+	\begin{itemize}[leftmargin=*,labelsep=5pt]
+	}{
+	\end{itemize}
+}
+% For creating enumeration enviroments that are flush left with the margin
+\newenvironment{compactenum}{
+	\begin{enumerate}[leftmargin=*,labelsep=5pt]
+	}{
+	\end{enumerate}
+}
+
+% For creating description enviroments that have a smaller margin
+\newenvironment{compactdesc}{
+	\begin{description}[leftmargin=1em,labelsep=0.7em, font=\normalfont\itshape]
+	}{
+	\end{description}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                              %
+%                                Begin Document                                %
+%                                                                              %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+	\footnotesize
+
+	% Begin the multicols environment
+	\begin{multicols*}{3}
+	% Make the title align with the rest of the columns
+	\hfill
+	\vspace{-1\baselineskip}
+	\hfill
+	
+	% Making the Title
+	\myline
+	\vspace{-0.2cm}
+	\begin{center}
+		\LARGE \textsc{Personal Finance Principals} 
+	\end{center}
+	\vspace{-0.2cm}
+	\myline 
+	
+	\newcommand{\blank}{\_\_\_\_\_\_\_\_\_\_\_\_}
+	\begin{topic}{Numbers Game}
+		We first need to compute a number called your savings rate - this is the a number that describes how much you save relative to how much you bring home. The US average is 3-5\% to get perspective on how large this number usually is. 
+		
+		\begin{tellme}{Compute the Savings Rate}
+			\begin{compactenum}
+				\item Let Salary = \blank
+				\item Let Tax\_Rate = \blank (35\% is a good default)
+				\item Let InvestPW = \blank (Weekly Investment)
+				\item Let InvestPW += 225 if you max your 401k (\$18,000 p/y)
+				\item Let InvestPW += 105 if you max your Roth (\$5,500 p/y)
+				\item Let InvestPw *= 52
+				\item Let 
+				\begin{align*}
+				\text{Savings Rate} = \frac{\text{InvestPW}}{\text{Salary} \times (1 - \text{Tax\_Rate})} 
+				\end{align*}
+			\end{compactenum}
+		\end{tellme}
+		\begin{tellme}{Computing the Cost of a Free Day}
+			\begin{compactdesc}
+				\item[Worst Day] Imagine the worst day you have ever had at work. How much would you pay to make this day go away? Your boss wouldn't know. The problem would solve itself and you could come in the next day and everything would just work out. Would you spend \$10?. How about \$1MM?. Put a number down. \blank
+				\item[Normal Day] Same mission as the computation for the Worst Day, but imagine now you are just thinking about a normal day. How much would you pay? Write a number down. \blank
+				\item[Day with your Kids] How much would you pay to have an extra day with your kids. Write a number down. \blank
+				\item[Day on Vacation] Imagine you could have another day of vacation. How much would you pay to extend vacation for a day? Write a number down. \blank  
+			\end{compactdesc}
+		\end{tellme}
+		\begin{tellme}{Computing Mystery Number One}
+			Look up your savings rate in the following table and then add your age to the number on the right. For instance, if my savings rate is 3\% and I am 25 years old then 76 + 25 = 101. This is your first mystery number. Save this number \blank
+			\begin{center}
+				\begin{tabular}{cc}
+					\toprule
+					Savings Rate & M\#1\\
+					\midrule
+					1.00\% & 99\\ 
+					2.00\% & 85\\ 
+					3.00\% & 76\\ 
+					4.00\% & 70\\ 
+					5.00\% & 66\\ 
+					7.50\% & 57\\ 
+					10.00\% & 51\\ 
+					15.00\% & 43\\ 
+					20.00\% & 37\\ 
+					25.00\% & 32\\ 
+					30.00\% & 28\\ 
+					40.00\% & 22\\ 
+					50.00\% & 17\\ 
+					60.00\% & 12\\ 
+					70.00\% & 9\\ 
+					80.00\% & 6\\ 
+					90.00\% & 3\\ 
+					100.00\% & 0\\ 
+					\bottomrule
+				\end{tabular}
+			\end{center}
+		\end{tellme}
+		\begin{tellme}{Computing Mystery Number Two}
+			Look up your savings rate along the y-axis. Take your salary and divide it by \$100,000. Multiply the number that you lookup by this multiplier. Save this number. For example, if my savings rate was 5\% and my salary is \$150,000, then I would take \$150,000 / \$100,000 = 1.5 and multiply this by 5.21 = 7.82 to get my second mystery number.
+			\begin{center}
+				\begin{tabular}{cc}
+					\toprule
+					Savings Rate & M\#2\\
+					\midrule
+					1.00\% & 1.74 \\ 
+					2.00\% & 3.48 \\ 
+					3.00\% & 5.21 \\ 
+					4.00\% & 6.95 \\ 
+					5.00\% & 8.69 \\ 
+					7.50\% & 13.03 \\ 
+					10.00\% & 17.38 \\ 
+					15.00\% & 26.07 \\ 
+					20.00\% & 34.76 \\ 
+					25.00\% & 43.45 \\ 
+					30.00\% & 52.14 \\ 
+					40.00\% & 69.51 \\ 
+					50.00\% & 86.89 \\ 
+					60.00\% & 104.27 \\ 
+					70.00\% & 121.65 \\ 
+					80.00\% & 139.03 \\ 
+					90.00\% & 156.41 \\ 
+					95.00\% & 165.1 \\ 
+					\bottomrule
+				\end{tabular}
+			\end{center}
+			
+		\end{tellme}
+	\end{topic}
+
+	% Get a counter setup for the principal numbering
+	\newcounter{principalnum}
+	\newcommand{\resetprincount}{\setcounter{principalnum}{0}}
+	\newcommand{\princount}{\arabic{principalnum} \stepcounter{principalnum}}
+	\resetprincount
+
+	\begin{topic}{General Principals}
+		
+		\begin{prin}{Principal G\princount: The Principal of Financial Talk Negativity: 
+		 A financial talk has to be somewhat discouraging and scary. If it is not, the speaker is trying to sell you something} \end{prin}
+	
+		\begin{prin}{Principal G\princount: The Principal of Two Selves: Future you
+		and Current You are actually two separate people with different dreams,
+		ambitions, wants, goals, and feelings} Current You wants nice things. Future You wants different nice things. Freedom is the only thing that ensures that Future You isn't screwed over by Current You, and managing your money correctly is a good way to accomplish freedom
+		\end{prin}
+	
+		\begin{prin}{Principal G\princount: The Principal of Uncertainty: In finance, often it is not about having the best mouse-trap detector; sometimes it is about having the best helmet} Even if you predict when and how the next downturn will come about, it is next to impossible to predict the magnitude. \textsc{Your focus in personal finance should be on making money while protecting your downside. You make a good investing career not through hitting home runs but through not striking out.} 
+		\end{prin}
+	\end{topic} \resetprincount
+
+	\begin{topic}{Tax Principals}
+			
+		\begin{prin}{Principal T\princount: The Principal of Tax Magnitude: Taxes are the single largest expense you will incur over the course of your life} At over 30\% of your pay every paycheck for the rest of your life, there isn't even a close second\end{prin}
+				
+			
+		\begin{prin}{Principal T\princount: The Principal of Marginal Tax Rates: The American System of taxation uses a progressive marginal tax rate } Consult the IRS and state taxes to see how this differs for different marital statuses, states, etc\end{prin}
+			
+	
+		\begin{prin}{Principal T\princount: The Principal of Multiple Taxes: The American tax system taxes income generally at the federal, state, and local levels and includes regular income tax and FICA taxes} \end{prin}
+	
+		\begin{prin}{Principal T\princount: The Principal of Withholding: The amount of taxes that are taken out of each paycheck are an approximation and your refund at the end of the year is the amount in taxes you overpaid the previous year} \end{prin}
+	
+		\begin{prin}{Principal T\princount: The Principal of Annualized Withholding: The amount of taxes withheld from each paycheck is a function of the annualized value of that paycheck and not on your history of tax payments} Imagine you are paid semi-weekly (every two weeks) and you earn \$10,000 that paycheck and \$1000 per paycheck after. On your first paycheck, you will be taxed as if you made $ 10,000 \times 26 = 260,000 $ a year, whereas the next paycheck you would be taxed as if you made $ 1,000 \times 26 = 26,000 $ a year\end{prin}
+	
+		\begin{prin}{Principal T\princount: The Principal of Bonus Taxation: Bonuses are taxed at a rate called the supplemental rate which is different than your income rate} \end{prin}
+	
+		\begin{prin}{Principal T\princount: The Principal of Investment Taxation: Investments are taxed differently than income - use this to your advantage} Income from our occupation is often taxed much higher than investment income \end{prin}
+			
+	
+		\begin{prin}{Principal T\princount: The Principal of Long Term Capital Gains: If an investment is held for longer than a year, you typically only pay long-term capital gains tax which is very low} Long term capital gains tax in the United States is typically 15\%\end{prin}
+			
+	
+		\begin{prin}{Principal T\princount: The Principal of Tax-advantaged vehicles: Depending on which accounts you invest your assets in, your tax status can greatly change} We will talk about this a lot more in the Retirement Account Principals \end{prin} 
+	\end{topic} \resetprincount
+	
+	
+	\begin{topic}{Retirement Account Principals}
+		
+		\begin{prin}{Principal R\princount: The Principal of Tax Deferred Accounts: Accounts like your 401k are taxed when you withdraw money and not when you contribute} The assumption is that your tax rate in retirement will be lower than it is currently \end{prin}
+			
+	
+		\begin{prin}{Principal R\princount: The Principal of Tax-Exempt Accounts: Accounts like your Roth IRA are exempt from taxes when you withdraw the money but are contributed to post-tax} The assumption is that your tax rate in retirement will be higher than it is now \end{prin}
+			
+	
+		\begin{prin}{Principal R\princount: The Principal of Tax-Advantaged Investing: Tax advantaged accounts grow investment income tax-free for the duration of the vehicle} This means that any interest you receive while you are not retired grows tax free \end{prin}
+			
+	
+		\begin{prin}{Principal R\princount: The Principal of Penalties: Depending on the account, you may incur a penalty if you withdraw your money early from a tax-advantaged account} Generally, your 401k is subject to a 10\% penalty on your principal and interest. You can withdraw your principal penalty free anytime from a Roth IRA but suffer from a penalty if you withdraw the interest early. Exceptions apply for both cases \end{prin}
+				
+	\end{topic}\resetprincount
+	
+	\begin{topic}{Emergency Funds}
+			
+			\begin{prin}{Principal E\princount: The Principal of Emergency Funds: Emergency funds are your single largest priority until you get one - they are insurance on yourself} Emergency funds are your best choice of purchasing insurance against bad things. Cash on hand is cheap to hold, quick to deploy, and allows you to both weather bad times and take advantage of opportunities\end{prin}
+			
+			\begin{prin}{Principal E\princount: The Principal of Non-Emergency Credit: Emergency funds should never be ``credit lines'' including Home Equity lines, credit cards, etc.} Having seen friends who worked in high-finance get their credit line get cut off at the worst of times, you don't want to be in this situation. Always keep your emergency fund in cash\end{prin}
+	
+			\begin{prin}{Principal E\princount: The Principal of Emergency Fund Liquidity: Your emergency fund should be able to be at least 70\% convertible to cash in a day and 100\% by three days} I have seen friends need up to \money{8000} in a single day to cover death in the family costs, travel costs, and similar. Often when you need the money the most, you have very little time to react, and so the closer that you can get it to cash the better. In order of ease of access from easiest to hardest to access:
+			\begin{compactenum}
+				\item Cash - Someone will always take cash - I promise you that \item Checking Account \item Savings Account \item Money Market Account 
+			\end{compactenum} I would not put my own emergency fund into anything less liquid than a money market account \end{prin}
+	
+			\begin{prin}{Principal E\princount: The Principal of Emergency Fund Interest: You don't care about interest on your emergency fund, you care about how quickly you can convert it to cash} It is best to keep your emergency fund in a savings account that yields an acceptable interest rate and has a paired checking account. You should be able to click two or three buttons and have it as cash in hand\end{prin}
+	
+			\begin{prin}{Principal E\princount: The Principal of Emergency Fund Sizing: You should size your emergency fund to the maximum of \$15,000 and 6 months expenses - whichever is greater} \end{prin}
+
+	\end{topic}\resetprincount
+	
+	\begin{topic}{Investing Principals}
+		
+		\begin{prin}{Principal I\princount: The Principal of Investing What you only can Lose: If you can't go 40+ years without seeing the money again, you probably shouldn't be investing} You should only be investing when you can afford to never see the money again. If you will need the money within the next 10 years, you should think before you actually invest it\end{prin} 
+		
+		\begin{prin}{Principal I\princount: The Principal of Emotion: If the Market drops 50\%, you should be \textsc{buying} and \textsc{not selling}} If all of your favorite items went on sale for half-off, you should be purchasing them and not selling them. Buy low. Sell high. Don't \textsc{ever} do the reverse\end{prin} 
+		
+		\begin{prin}{Principal I\princount: The Principal of Emergency Funds First: You should fund your emergency fund before you invest a single dollar of money in anything else} It's not the sexiest investment, but one of the worst things that can happen to your finances is having to sell when you absolutely shouldn't - when do you need your money the most? Usually in an economic downturn or emergency. When is the stock market the lowest? Usually during an economic downturn or emergency. Don't sell at the worst times because you didn't have cash set aside when you needed it in an emergency fund\end{prin} 
+		
+		\begin{prin}{Principal I\princount: The Principal of Debt Payment: If you have outstanding loans, I would pay those off first before you invest a single dollar} If you pay off a loan with 6\% interest, you are effectively investing in an asset with a guaranteed 6\% return. A guaranteed return is almost always better than a risky return - especially in finance and especially given where interest rates on loans are right now\end{prin} 
+		
+		\begin{prin}{Principal I\princount: The Principal of Bonds: A bond is a promise to repay some money at a later date} A bond can be very safe (like a bond issued from the United States Government) or very risky (like the bonds issued by a small corporation that has a lot of debt). High-risk-high-reward applies in bond markets a lot, and bonds can get super complicated due to the large amount of math that can surround them \end{prin} 
+	
+		\begin{prin}{Principal I\princount: The Principal of Stocks: A stock is ownership in a company - you are promised some of their profits eventually} There are many types of stocks, including preferred stock, common stock, voting and non-voting shares, subordinated shares, coco's ... This can get really complicated 
+			so don't feel like you are alone if the idea of a stock seems foreign and even a little ... stupid ... at first \end{prin}
+			
+	
+		\begin{prin}{Principal I\princount: The Principal of Volatility: Stocks tend to be more volatile than bonds in the short run, but return bonds in the long run} \end{prin}
+	
+		\begin{prin}{Principal I\princount: The Principal of Diversification: A portfolio with all bonds is more risky than a portfolio with the appropriate mixture of stocks and bonds - more than one asset class is always good} The way I think about investing diversification is imagine you own a factory with a big glass window. Imagine it is a single piece of glass spanning 40 ft wide. Imagine a neighbor hood kid throws a rock at it.
+			
+			How many rocks does it take to destroy the window? The answer is one. Now turn that window into 100 little windows that cover the same area. Now that same rock only damages a small section of the window
+			and you can replace it for much less than the cost of the single piece of glass. That is diversification \end{prin}
+		
+		\begin{prin}{Principal I\princount: The Principal of Rebalancing: As time goes on, your portfolio will become ``unbalanced''. You should keep an eye out for this and correct it if it drifts too far} Imagine you are targeting a 75\% stock 25\% bond portfolio. Over time, stocks do well and so it becomes 80\% stock and 20\% bond portfolio. You should sell some stocks and invest in bonds to rebalance it \end{prin}
+	
+		\begin{prin}{Principal I\princount: The Principal of Index Funds: Index funds (especially ETFs) can provide a great mix of assets for reasonable costs} An index fund is a basket of stocks that you purchase all at once that looks-and-feels like a single stock, but performs as if you bought a lot of different stocks instead. Often you will combine multiple ETFs or mutual funds to create a portfolio \end{prin}
+		 
+	
+		\begin{prin}{Principal I\princount: The Principal of Fees: Watch out for fees anytime that you purchase a mutual fund or index fund - they can eat alive your return} Generally, fees less than 0.10\% are best, less than 0.20\% are OK, and anything over 0.30\% should set off alarms in your head unless it is a special asset class\end{prin}
+			
+	
+		\begin{prin}{Principal I\princount: The Principal of Time: When investing for time periods of $ > $ 10 years, you can afford much riskier allocations than someone who is retiring sooner} A very crude rule of thumb is that your percentage of assets to be held in stocks is equal to 115 less your age. So if you're 25, then 90 percent stocks is a decent allocation percentage\end{prin}
+	\end{topic} \resetprincount
+	
+	
+	\begin{topic}{Personal Finance Principals}
+	
+		\begin{prin}{Principal P\princount: The Principal of Savings Rate: Your Savings Rate is the most important number that you can control - nothing else comes even close} 
+		Your savings rate has the greatest sensitivity to the date that you are financially free. Especially when your current rate is low, a change of 5\% could mean decades of your working life. 	
+		\end{prin}
+			
+		\begin{prin}{Principal P\princount: The Principal of 4\%: Most financial research indicates that you can can withdraw 4\% of your portfolio almost indefinitely - this sets your threshold for retirement} This means that if you have a portfolio of \money{1000000} of assets (not including your primary residence) then you can reasonably expect to be able to withdraw \money{40000} a year for life without 
+		worrying about it. In other-words, if you have \money{1000000} invested, and your expenses are less than \money{40000} a year, you are financially independent!
+		\end{prin}
+						
+		\begin{prin}{Principal P\princount: The Principal of Insurance: If you cannot afford to take a certain loss like a large medical bill or house fire, it is worth insuring against it} \end{prin}
+			
+		\begin{prin}{Principal P\princount: The Principal of Less is More: The following are equivalent due to the math of retirement: Saving \money{300} more for retirement or removing \$1 of cost per month from your spending} No, this is not a Typo.. If you have a portfolio of \money{300}, then by the 4\% rule you can reasonably withdraw $4\% \times \$300 = \$12$ a year which is \$1 a month. This is not a mistake, this is just the math of the problem
+		
+		Imagine you purchase a coffee in the morning on the way to work. It costs you \$3 more a day to purchase this coffee than to make your own. You work, on average, usually 24 days a month. $ 3 \times 24 = \money{72} $ a month in coffee. Thus you are indifferent in the following from a life prospective:
+		\begin{compactenum}
+			\item Receiving $ \frac{72 \times 12}{0.04} = \money{21600}  $ at the date of your retirement which is worth about \money{8100} today if you are going to retire in 25 years or
+			\item Not buying the coffee and making your own...
+		\end{compactenum}
+		\end{prin}
+			
+		\begin{prin}{Principal P\princount: The Principal of Compounding Interest: Money compounds exponentially due to compounding interest and this math is highly non-intuitive and non-linear. Always do the math before making a decision because intuition will lead you astray}
+		Imagine you have \money{10000} and invest this plus \money{2000} per year at 8\% for 10 years. How much will you have? It should be about \money{50500}. Double the time. You will have \money{138000}. Double the interest rate. You will have \money{86000}. This is the power of interest 
+		\end{prin}
+			
+			
+	\end{topic}\resetprincount
+	\begin{topic}{Automation Principals}
+		
+		\begin{prin}{Principal A\princount: The Principal of Expense Automation: You should automate next to as much of your expenses as you can} Humans are lazy. Humans make mistakes. The less you have to think about your finances, and the more the correct decisions are made for you, the better. Good candidates for automation: your rent check, paying off your credit card, payments to your student loan, etc \end{prin}
+		\begin{prin}{Principal A\princount: The Principal of Investing Automation: All of your finances and investing should be automated} Even one click a month is too much. Almost all brokers give you options to max out your 401k, Roth IRA, HSA, and similar automatically. You should elect to enroll in these options by default if you can.  \end{prin}
+		\begin{prin}{Principal A\princount: The Principal of Cave Investing: If you can't go long periods without checking your portfolio, its probably not robust} You should be able to live in a cave without internet for a month and not worry about your portfolio. If you can't, either (1) you decided to be an active investor which is rarely appropriate for a non-professional investor or (2) your portfolio is not allocated correctly and has too high of a variance for your situation  \end{prin}
+		
+	\end{topic}
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+%\begin{topic}{}
+%		\begin{prin}{Principal G1:} \end{prin}
+%\end{topic}
+%
+%
+%\begin{topic}{}
+%		\begin{prin}{Principal G1:} \end{prin}
+%\end{topic}
+%
+%
+%\begin{topic}{}
+%		\begin{prin}{Principal G1:} \end{prin}
+%\end{topic}
+
+
+
+
+
+
+
+
+%\begin{topic}{General Rules of Investing (Not Gambling)}
+	%        \noindent Investing is not gambling. It is OK to gamble, but that is seperate from investing and should be treated as such. There are a few good heuristics that will steer you in the right direction when you are looking at potenntial investments:
+	%        \begin{compactdesc}
+	%            \item[The Principal of Savings Rate] Your savings rate is the most important thing under your control. It dwarfs every other variable and it is the single most important variable you can influence. Optimize it to be as high as humanly possible
+	%            \item[The Pricnipal of Time] Second only to your savings rate, how long you have been investing is a critical factor in your success. If it means months of analysis or 30 minutes to a decisoin, you should always aim to start now rather than later. Money left uninvested, or worse, spent, is the easiest way to slow your growth of your investment portfolio
+	%            \item[The Principal of Liquidity] You should be able to get your money out of an investment in a few weeks time at the maximum and preferably within 2-3 days at the longest 
+	%            \item[The Principal of Pooling Multiple Assets] If your asset does not have at least 10-20 equity positions in the security (this is checking if it is an index fund or not) or is not at least an 'A' rated bond, you should probably think twice before you invest
+	%            \item[The Principal of Diversification] You should never concenrate more than 60\% of your wealth in any one index fund or asset class. Choose from a variety of stocks, bonds, sectors, currencies, etc
+	%            \item[The Principal of Fees] If you pay more than 0.50\% on any of your funds, you are getting robbed and should drop that fund. If you stick with Vanguard, you are almost always safe
+	%            \item[The Principal of Boring] If you were to be locked in a cave for the next month, your finances should be fine wihtout your guidance. If you need to check on them any more frequently than once a month (pref. once a quarter), then you are probably gambling and not investing
+	%            \item[The Principal of Automation] If you were to be locked in a cave for the next year, your finances should be self-funding and automated. Contributions to your Roth, 401, etc should be automatic, algorithmic, and not micro-managed
+	%            \item[The Principal of Dollar-Cost Averaging] If you have \$10,000 to invest, you can reduce the risk of the investment by investing it over a longer time horizon instead of all at once
+	%            \item[The Principal of Shiny Toys] Don't think that you need to choose the newest, best, highest yielding instrument. Refer to the Principal of Boring. Your investments should be pretty boring to avoid emotional swings
+	%            \item[The Principal of Taxes] Don't begin optimizing for taxes until you have optimized for your savings rate - nothing is as important as your savings rate and ensuring that it is as high as possible
+	%        \end{compactdesc}
+	%    \end{topic}
+
+
+
+%	\begin{topic}{Introduction} Financial independence is about the day that you can tell your boss to go-fish. It is not retirement. Retirement is the day that you reach financial independence and choose not to work. Most people who have financial independence choose to keep working. 
+%		\begin{tellme}{Opening Questions}
+%			Imagine you are outside playing with your kids. Imagine you could pay \$$ x $ to have another day off of work to enjoy your time with them. What is \$$ x $
+%		\end{tellme}
+%		\begin{tellme}{Motivations of this Course}
+%			\begin{compactitem}
+%				\item This course is not to make you hate work or think of work negatively. It is to think of freedom positively. What would you do with a free day? 
+%				\item My goal is not to change your actions. I am trying to change the way that you think
+%			\end{compactitem}		
+%		\end{tellme}
+%		\begin{tellme}{Future You vs Current You}
+%			There is a battle between future you and current you. Future you is not current you, and will have different dreams, aspirations, constraints, and relationships. Much of personal finance is making sure that you are able to live life today and not mess up life for future you. Current you wants things now. Future you is usually shafted as a result. Life is not about constraining current you while still ensuring that future you feels like they are not constrained as well. 
+%		\end{tellme}
+%	\end{topic}
+%	
+%	\begin{topic}{Overview} 
+%        For financial course, first concept: I am not trying to make you hate work or if you work negatively, I am trying to make you view freedom appropriately. Cost of AJ question how much would you give not to go into work whenever you want to play with your kids? Also, I am not trying to change what you do. I am trying to change how you think. Often times, if you change how you think, the way that you do stuff will change as well. Second concept: concept of future you versus previous you, any bad thing that has happened in your life is a result of previous you shafting future you. Sometimes decisions are made with incomplete information, how much would you pay to update that information to make better life outcomes? Future you getting shafted by previous you. Third concept: imagine playing a casino game with output function of a normal distribution. Then hide the distribution of the return. Then connected with a Hey Line, does that change the way you look at things? Fourth concepts: the value of information, hiking up a cliff. Example about food. You can add insurance by adding another backpack of food to mitigate the effect of adverse outcomes. Or you can incorporate exit options into your plan along with flexibility to update your current path of action.		
+%	\end{topic}
+%	
+%    \begin{topic}{Retirement Accounts}
+%        \noindent There are two main types of retirement accounts that are common in America 
+%        \begin{compactdesc}
+%            \item[Tax Deffered] You contribute pre-tax dollars to the account, your investments grow tax free, and then you are taxed on the appreciation as ordianry income when you withdraw. There are two main vehnicles for this:
+%            \begin{compactitem}
+%                \item 401k
+%                \item Traditional IRA
+%            \end{compactitem}
+%            \item[Post-Tax Contributions] You contribute post-tax dollars to the account, your investments grow tax free, and then you are allowed to take out the appreciation tax free. There is only one investment vehicle that allows this: The Roth IRA
+%        \end{compactdesc}
+%        Usually an example helps out the most. Imagine that you are 25 years old, your current tax rate is 30\%, your tax rate at age 60 is 25\%, and you earn 5\% on your investments annually. Here are the returns for each case:    
+%        \begin{compactenum}
+%        \item 401k: You earn \$100 today. You aren't taxed on your contribuiton so you put \$100 in your 401k. You then compound it tax free for 35 years to yield a total investment size of $100 \times (1.05)^35 = \$551.60$ which is comprised of \$100 of contributions and \$451.60 of interest. You are taxed on the full amount so you end up with $(1-25\%) \times \$551.60 = \$413.70$
+%        \item Roth IRA: You earn \$100 today. You are taxed on your contribuiton so you put $\$100\times (1 - 30\%) = \$70$ in your Roth IRA. You then compound it tax free for 35 years to yield a total investment size of $70 \times (1.05)^35 = \$386.12$ which is comprised of \$100 of contributions and \$286.12 of interest. You are not taxed on any of your final withdraws so you end up with $386.12$
+%        \end{compactenum}
+%        This example should illuminate something - depending on your tax situation at retirement, there can be benefits to choosing one vehicle over another. Mathematically, it is better to contribute to your 401k before your Roth IRA if you believe that your tax rate in retirment will be lower than it is now. If you believe in the contrary, then you would chose to preference your Roth over your 401k. While each situation is different, here is my practial advice (in order of how you should do them):
+%        \begin{compactenum}
+%            \item Ensure you have a great emergency fund setup before you even begin to think about investing
+%            \item Pay off all of your debts regardless of the denomination. This is guaranteed interest - something that you can never earn in the markets
+%            \item Contribute to your 401k up to your employer stops matching
+%            \item Contribute up to the maximum into your Roth IRA - you can always withdraw the contributions tax free at any time with no penalty
+%            \item Think about post-tax options if you are looking to retire early
+%            \item Contribute and max out your 401k
+%        \end{compactenum}
+%    \end{topic}
+%
+%    \begin{topic}{Sizing the Emergency Fund}
+%        \noindent There are many theories on how to best size the emergency fund according to risk profiles and probability. The Emergency Fund is, in the most literal sense, you taking out an insurance policy on yourself, funded by yourself, for emergencies requiring cash. General advice indicates that you should have the maximum of the following scenerios: 
+%        \begin{compactenum}
+%            \item \$15,000 in cash
+%            \item 6 months of living expenses including rent, food, insurance, car payments, repairs, etc
+%        \end{compactenum}
+%        Your emergency fund is a kind of insurnace, and you should NOT be optimizing for yield (return) on your money. This is boring money - you should prioritize your abilty to convert this into cash as easily as possible over anything else. My general rule is that unless I can have the money by the end of the day in my hand, it isn't worth it to earn the extra interest. Flexibilty is king for this account. 
+%    \end{topic}
+%
+%    
+%    
+
+		
+
+\end{multicols*}
+\end{document}
